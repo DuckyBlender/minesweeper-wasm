@@ -1,4 +1,4 @@
-name: Rust Wasm GitHub Pages
+name: Build and Deploy
 
 on:
   push:
@@ -17,12 +17,12 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          profile: minimal
           override: true
 
       - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          version: latest
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build with wasm-pack
         run: |
@@ -30,7 +30,8 @@ jobs:
           wasm-pack build --target web
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          branch: pages
+          folder: pkg
+          clean: true
