@@ -13,7 +13,7 @@ use wasm_bindgen::prelude::*;
 
 thread_local! {
   static MINESWEEPER: RefCell<Minesweeper>
-    = RefCell::new(Minesweeper::new(20, 20, 40)); // medium difficulty
+    = RefCell::new(Minesweeper::new(20, 20, 40)); // medium difficulty by default
 }
 
 #[wasm_bindgen(js_name = getState)]
