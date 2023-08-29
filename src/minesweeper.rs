@@ -138,6 +138,15 @@ impl Minesweeper {
 
         // Reveal the cell
         cell.cell_state = CellState::Revealed;
+
+        // If the cell is a NoMine, reveal all adjacent cells
+        if let CellType::NoMine(adjacent_mines) = cell.cell_type {
+            if adjacent_mines == 0 {
+                for neighbor in self.neighbors(position) {
+                    self.reveal(neighbor);
+                }
+            }
+        }
     }
 
     fn neighbors(&self, position: Position) -> Vec<Position> {

@@ -26,21 +26,3 @@ impl XORShift {
         self.w
     }
 }
-
-// Function to generate mines for minesweeper game
-fn generate_mines(width: usize, height: usize, num_mines: usize) -> Vec<(usize, usize)> {
-    let mut rng = XORShift::new();
-    let mut mines = Vec::new();
-
-    while mines.len() < num_mines {
-        let x = rng.next() as usize % width;
-        let y = rng.next() as usize % height;
-        let mine = (x, y);
-
-        if !mines.contains(&mine) {
-            mines.push(mine);
-        }
-    }
-
-    mines
-}
