@@ -2,9 +2,9 @@ use crate::random::*;
 
 use std::{collections::HashMap, fmt::Display};
 
-const WIDTH: usize = 10;
-const HEIGHT: usize = 10;
-const MINE_COUNT: usize = 10;
+pub const WIDTH: usize = 10;
+pub const HEIGHT: usize = 10;
+pub const MINE_COUNT: usize = 10;
 
 type Position = (usize, usize);
 
@@ -28,7 +28,7 @@ struct Cell {
 }
 
 #[derive(Debug)]
-struct Minesweeper {
+pub struct Minesweeper {
     width: usize,
     height: usize,
     board: HashMap<Position, Cell>,
@@ -39,6 +39,9 @@ impl Display for Minesweeper {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut output = String::new();
 
+        // Print size
+        // output.push_str(&format!("{}x{}\n", self.width, self.height));
+
         for y in 0..self.height {
             for x in 0..self.width {
                 let position = (x, y);
@@ -46,22 +49,11 @@ impl Display for Minesweeper {
 
                 let cell_state = match cell.cell_state {
                     CellState::Revealed => match cell.cell_type {
-                        CellType::Mine => "💣".to_string(),
-                        CellType::NoMine(adjacent_mines) => match adjacent_mines {
-                            0 => "0️⃣ ".to_string(),
-                            1 => "1️⃣ ".to_string(),
-                            2 => "2️⃣ ".to_string(),
-                            3 => "3️⃣ ".to_string(),
-                            4 => "4️⃣ ".to_string(),
-                            5 => "5️⃣ ".to_string(),
-                            6 => "6️⃣ ".to_string(),
-                            7 => "7️⃣ ".to_string(),
-                            8 => "8️⃣ ".to_string(),
-                            _ => panic!("Invalid number of adjacent mines"),
-                        },
+                        CellType::Mine => "💣 ".to_string(),
+                        CellType::NoMine(adjacent_mines) => format!("{} ", adjacent_mines),
                     },
-                    CellState::Flagged => "🚩".to_string(),
-                    CellState::Hidden => "⬜".to_string(),
+                    CellState::Flagged => "🚩 ".to_string(),
+                    CellState::Hidden => "🟪 ".to_string(),
                 };
 
                 output.push_str(&cell_state);
@@ -74,7 +66,7 @@ impl Display for Minesweeper {
 }
 
 impl Minesweeper {
-    pub fn new(mine_count: usize) -> Minesweeper {
+    pub fn new() -> Minesweeper {
         let mut minesweeper = Minesweeper {
             width: WIDTH,
             height: HEIGHT,
@@ -130,11 +122,6 @@ impl Minesweeper {
         minesweeper
     }
 
-    pub fn render(&self) -> String {
-        let string = format!("{}", self);
-        string
-    }
-
     pub fn reveal(&mut self, position: Position) {
         let cell = self.board.get_mut(&position).unwrap();
         if cell.cell_state == CellState::Revealed
@@ -153,7 +140,7 @@ impl Minesweeper {
         cell.cell_state = CellState::Revealed;
     }
 
-    pub fn neighbors(&self, position: Position) -> Vec<Position> {
+    fn neighbors(&self, position: Position) -> Vec<Position> {
         let mut neighbors = Vec::new(); // can't use an array because we don't know the size
         let (x, y) = position;
         for i in -1..=1 {
@@ -181,6 +168,19 @@ impl Minesweeper {
 
         neighbors
     }
+
+    pub fn flag(&mut self, position: Position) {
+        let cell = self.board.get_mut(&position).unwrap();
+        if cell.cell_state == CellState::Revealed || self.game_over {
+            return;
+        }
+
+        match cell.cell_state {
+            CellState::Flagged => cell.cell_state = CellState::Hidden,
+            CellState::Hidden => cell.cell_state = CellState::Flagged,
+            CellState::Revealed => (),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn reveal_cell() {
-        let mut minesweeper = Minesweeper::new(MINE_COUNT);
+        let mut minesweeper = Minesweeper::new();
 
         // Reveal a cell
         let position = (5, 5);
@@ -208,7 +208,7 @@ mod tests {
     #[test]
     fn board_initialization() {
         // Check if the mines are truly random
-        let minesweeper = Minesweeper::new(MINE_COUNT);
+        let minesweeper = Minesweeper::new();
 
         assert_eq!(minesweeper.width, WIDTH);
         assert_eq!(minesweeper.height, HEIGHT);
@@ -234,7 +234,7 @@ mod tests {
 
     #[test]
     fn test_neigbors() {
-        let minesweeper = Minesweeper::new(MINE_COUNT);
+        let minesweeper = Minesweeper::new();
         let position = (5, 5);
         let neighbors = minesweeper.neighbors(position);
         assert_eq!(neighbors.len(), 8);

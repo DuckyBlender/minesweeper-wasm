@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="description"
+      content="Minesweeper WASM - A minesweeper game written in Rust and compiled to WebAssembly"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Minesweeper WASM</title>
+
+    <style>
+      body {
+        font-size: 200%;
+        font-family: monospace;
+      }
+
+      .field {
+        text-decoration: none;
+        text-align: center;
+        width: 2.4rem;
+        height: 2.4rem;
+        line-height: 2.4rem;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Minesweeper WASM</h1>
+    <div id="root"></div>
+    <script type="module">
+      import init, {
+        getState,
+        revealField,
+        flagField,
+      } from "./pkg/minesweeper_wasm.js";
+
+      async function run() {
+        await init();
+
+        render(getState());
+      }
+
+      function render() {
+        let root = document.getElementById("root");
+        root.innerHTML = "";
+
+        let data = getState()
+          .split("\n")
+          .map((row) => row.trim().split(/\s+/));
+        root.style.display = "inline-grid";
+        root.style.gridTemplate = `repeat(${data.length}, auto) / repeat(${data[0].length}, auto)`;
+
+        for (let y = 0; y < data.length; y++) {
+          for (let x = 0; x < data[y].length; x++) {
+            let element = document.createElement("a");
+            element.classList.add("field");
+            element.href = "#";
+            element.innerText = data[y][x];
+
+            element.addEventListener("click", (evt) => {
+              evt.preventDefault();
+
+              revealField(x, y);
+              render();
+            });
+
+            element.addEventListener("contextmenu", (evt) => {
+              evt.preventDefault();
+
+              flagField(x, y);
+              render();
+            });
+
+            root.appendChild(element);
+          }
+        }
+      }
+
+      run();
+    </script>
+  </body>
+</html>
