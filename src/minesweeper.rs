@@ -216,13 +216,6 @@ mod tests {
         let position = (5, 5);
         minesweeper.reveal(position);
 
-        // for x in 0..WIDTH {
-        //     for y in 0..HEIGHT {
-        //         let position = (x, y);
-        //         minesweeper.reveal(position);
-        //     }
-        // }
-
         println!("{}", minesweeper);
     }
 
