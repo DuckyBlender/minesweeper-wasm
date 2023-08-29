@@ -222,11 +222,15 @@ mod tests {
     #[test]
     fn board_initialization() {
         // Check if the mines are truly random
-        let minesweeper = Minesweeper::new(20, 20, 40);
+        let height = 20;
+        let width = 20;
+        let mine_count = 40;
 
-        assert_eq!(minesweeper.width, 100);
-        assert_eq!(minesweeper.height, 100);
-        assert_eq!(minesweeper.board.len(), 100 * 100);
+        let minesweeper = Minesweeper::new(height, width, mine_count);
+
+        assert_eq!(minesweeper.width, height);
+        assert_eq!(minesweeper.height, width);
+        assert_eq!(minesweeper.board.len(), height * width);
 
         // Check that the number of mines is correct
         let mine_count = minesweeper
