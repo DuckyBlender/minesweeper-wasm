@@ -36,8 +36,8 @@ pub fn flag_field(x: usize, y: usize) {
 }
 
 #[wasm_bindgen(js_name = reset)]
-pub fn reset() {
+pub fn reset(x: usize, y: usize, mine_count: usize) {
     MINESWEEPER.with(|ms| {
-        ms.borrow_mut().reset();
+        ms.borrow_mut().reset(x, y, mine_count);
     });
 }

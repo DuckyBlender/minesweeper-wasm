@@ -199,8 +199,8 @@ impl Minesweeper {
         }
     }
 
-    pub fn reset(&mut self) {
-        *self = Minesweeper::new(self.width, self.height, self.mine_count);
+    pub fn reset(&mut self, width: usize, height: usize, mine_count: usize) {
+        *self = Minesweeper::new(width, height, mine_count);
     }
 }
 
