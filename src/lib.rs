@@ -13,7 +13,7 @@ use wasm_bindgen::prelude::*;
 
 thread_local! {
   static MINESWEEPER: RefCell<Minesweeper>
-    = RefCell::new(Minesweeper::new());
+    = RefCell::new(Minesweeper::new(20, 20, 40)); // medium difficulty
 }
 
 #[wasm_bindgen(js_name = getState)]
@@ -32,5 +32,12 @@ pub fn reveal_field(x: usize, y: usize) {
 pub fn flag_field(x: usize, y: usize) {
     MINESWEEPER.with(|ms| {
         ms.borrow_mut().flag((x, y));
+    });
+}
+
+#[wasm_bindgen(js_name = reset)]
+pub fn reset() {
+    MINESWEEPER.with(|ms| {
+        ms.borrow_mut().reset();
     });
 }

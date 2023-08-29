@@ -22,6 +22,17 @@
         font-family: monospace;
       }
 
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: row;
+      }
+
       .field {
         text-decoration: none;
         text-align: center;
@@ -35,12 +46,18 @@
 
   <body>
     <h1>Minesweeper WASM</h1>
-    <div id="root">Loading...</div>
+    <!-- Horizontal div -->
+    <div id="container">
+      <div id="root">Loading...</div>
+      <div id="controls"></div>
+    </div>
+
     <script type="module">
       import init, {
         getState,
         revealField,
         flagField,
+        reset,
       } from "./pkg/minesweeper_wasm.js";
 
       async function run() {
@@ -57,6 +74,8 @@
         let data = getState()
           .split("\n")
           .map((row) => row.trim().split(/\s+/));
+        // Remove the last newline
+        data.pop();
         root.style.display = "inline-grid";
         root.style.gridTemplate = `repeat(${data.length}, auto) / repeat(${data[0].length}, auto)`;
 
@@ -84,6 +103,42 @@
             root.appendChild(element);
           }
         }
+
+        // Now setup the buttons
+        // Remove existing buttons
+        let controls = document.getElementById("controls");
+        controls.innerHTML = "";
+        // Create the buttons
+        let difficultyEasyButton = document.createElement("button");
+        let difficultyMediumButton = document.createElement("button");
+        let difficultyHardButton = document.createElement("button");
+
+        // Easy button
+        difficultyEasyButton.innerText = "Easy";
+        difficultyEasyButton.classList.add("controls");
+        difficultyEasyButton.addEventListener("click", (evt) => {
+          reset(10, 10, 10);
+          render();
+        });
+        controls.appendChild(difficultyEasyButton);
+
+        // Medium button
+        difficultyMediumButton.innerText = "Medium";
+        difficultyEasyButton.classList.add("controls");
+        difficultyMediumButton.addEventListener("click", (evt) => {
+          reset(20, 20, 40);
+          render();
+        });
+        controls.appendChild(difficultyMediumButton);
+
+        // Hard button
+        difficultyHardButton.innerText = "Hard";
+        difficultyEasyButton.classList.add("controls");
+        difficultyHardButton.addEventListener("click", (evt) => {
+          reset(30, 30, 100);
+          render();
+        });
+        controls.appendChild(difficultyHardButton);
       }
 
       run();

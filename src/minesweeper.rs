@@ -2,20 +2,16 @@ use crate::random::*;
 
 use std::{collections::HashMap, fmt::Display};
 
-pub const WIDTH: usize = 10;
-pub const HEIGHT: usize = 10;
-pub const MINE_COUNT: usize = 10;
-
 type Position = (usize, usize);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum CellState {
     Revealed,
     Flagged,
     Hidden,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum CellType {
     Mine,
     NoMine(u8), // number of adjacent mines
@@ -31,6 +27,7 @@ struct Cell {
 pub struct Minesweeper {
     width: usize,
     height: usize,
+    mine_count: usize,
     board: HashMap<Position, Cell>,
     game_over: bool,
 }
@@ -66,10 +63,16 @@ impl Display for Minesweeper {
 }
 
 impl Minesweeper {
-    pub fn new() -> Minesweeper {
+    pub fn new(width: usize, height: usize, mine_count: usize) -> Minesweeper {
+        assert!(width > 0);
+        assert!(height > 0);
+        assert!(mine_count > 0);
+        assert!(mine_count < width * height);
+
         let mut minesweeper = Minesweeper {
-            width: WIDTH,
-            height: HEIGHT,
+            width,
+            height,
+            mine_count,
             board: HashMap::new(),
             game_over: false,
         };
@@ -78,9 +81,9 @@ impl Minesweeper {
         let mut rng = XORShift::new();
         let mut mines = Vec::new();
 
-        while mines.len() < MINE_COUNT {
-            let x = rng.next() as usize % WIDTH;
-            let y = rng.next() as usize % HEIGHT;
+        while mines.len() < mine_count {
+            let x = rng.next() as usize % width;
+            let y = rng.next() as usize % height;
             let mine = (x, y);
 
             if !mines.contains(&mine) {
@@ -89,8 +92,8 @@ impl Minesweeper {
         }
 
         // Initialize board
-        for x in 0..WIDTH {
-            for y in 0..HEIGHT {
+        for x in 0..width {
+            for y in 0..height {
                 let position = (x, y);
                 let is_mine = mines.contains(&position);
 
@@ -123,27 +126,32 @@ impl Minesweeper {
     }
 
     pub fn reveal(&mut self, position: Position) {
-        let cell = self.board.get_mut(&position).unwrap();
-        if cell.cell_state == CellState::Revealed
-            || cell.cell_state == CellState::Flagged
-            || self.game_over
-        {
+        let cell_state = self.board[&position].cell_state; // this is copied
+        let cell_type = self.board[&position].cell_type; // this too
+        if cell_state == CellState::Revealed || cell_state == CellState::Flagged || self.game_over {
             return;
         }
         // If the cell is a mine, the game is over
-        if let CellType::Mine = cell.cell_type {
+        if let CellType::Mine = cell_type {
             println!("Game over!");
+            // Reveal all mines
+            for cell in self.board.values_mut() {
+                if let CellType::Mine = cell.cell_type {
+                    cell.cell_state = CellState::Revealed;
+                }
+            }
             self.game_over = true;
-        }
+        } else {
+            // Reveal the cell
+            self.board.get_mut(&position).unwrap().cell_state = CellState::Revealed;
 
-        // Reveal the cell
-        cell.cell_state = CellState::Revealed;
-
-        // If the cell is a NoMine, reveal all adjacent cells
-        if let CellType::NoMine(adjacent_mines) = cell.cell_type {
-            if adjacent_mines == 0 {
-                for neighbor in self.neighbors(position) {
-                    self.reveal(neighbor);
+            // If the cell is a NoMine, reveal all adjacent cells
+            if let CellType::NoMine(adjacent_mines) = cell_type {
+                if adjacent_mines == 0 {
+                    let neighbors = self.neighbors(position);
+                    for neighbor in neighbors {
+                        self.reveal(neighbor);
+                    }
                 }
             }
         }
@@ -190,6 +198,10 @@ impl Minesweeper {
             CellState::Revealed => (),
         }
     }
+
+    pub fn reset(&mut self) {
+        *self = Minesweeper::new(self.width, self.height, self.mine_count);
+    }
 }
 
 #[cfg(test)]
@@ -198,7 +210,7 @@ mod tests {
 
     #[test]
     fn reveal_cell() {
-        let mut minesweeper = Minesweeper::new();
+        let mut minesweeper = Minesweeper::new(20, 20, 40);
 
         // Reveal a cell
         let position = (5, 5);
@@ -217,11 +229,11 @@ mod tests {
     #[test]
     fn board_initialization() {
         // Check if the mines are truly random
-        let minesweeper = Minesweeper::new();
+        let minesweeper = Minesweeper::new(20, 20, 40);
 
-        assert_eq!(minesweeper.width, WIDTH);
-        assert_eq!(minesweeper.height, HEIGHT);
-        assert_eq!(minesweeper.board.len(), WIDTH * HEIGHT);
+        assert_eq!(minesweeper.width, 100);
+        assert_eq!(minesweeper.height, 100);
+        assert_eq!(minesweeper.board.len(), 100 * 100);
 
         // Check that the number of mines is correct
         let mine_count = minesweeper
@@ -238,12 +250,12 @@ mod tests {
             }
         }
 
-        assert_eq!(mine_count, MINE_COUNT);
+        assert_eq!(mine_count, 1000);
     }
 
     #[test]
     fn test_neigbors() {
-        let minesweeper = Minesweeper::new();
+        let minesweeper = Minesweeper::new(20, 20, 40);
         let position = (5, 5);
         let neighbors = minesweeper.neighbors(position);
         assert_eq!(neighbors.len(), 8);
