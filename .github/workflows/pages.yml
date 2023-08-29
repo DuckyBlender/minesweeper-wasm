@@ -35,4 +35,3 @@ jobs:
         with:
           branch: pages
           folder: pkg
-          clean: true
