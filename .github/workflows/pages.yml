@@ -26,6 +26,7 @@ jobs:
 
       - name: Build with wasm-pack
         run: |
+          git fetch
           git checkout pages
           wasm-pack build --target web
 
