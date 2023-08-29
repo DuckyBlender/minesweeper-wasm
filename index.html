@@ -12,6 +12,12 @@
 
     <style>
       body {
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        color: white;
         font-size: 200%;
         font-family: monospace;
       }
@@ -29,7 +35,7 @@
 
   <body>
     <h1>Minesweeper WASM</h1>
-    <div id="root"></div>
+    <div id="root">Loading...</div>
     <script type="module">
       import init, {
         getState,
