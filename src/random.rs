@@ -1,4 +1,4 @@
-// XORShift algorithm to generate random numbers
+// XORShift algorithm to generate pseudorandom numbers
 // https://en.wikipedia.org/wiki/Xorshift
 pub struct XORShift {
     x: u32,
